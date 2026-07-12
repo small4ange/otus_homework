@@ -9,7 +9,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     image: myapp/nginx
-    container_name: ${CONTAINER_NAME}
+    container_name: ${CONTAINER_NAME:-nginx-fcgi} #значение по умолчанию
     # проброс портов
     ports:
       - "80:80"

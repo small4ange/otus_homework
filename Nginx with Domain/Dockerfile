@@ -1,5 +1,5 @@
 FROM nginx
-
+# копируем конфиг для конкретного домена
 COPY ./mysite.local.conf /etc/nginx/conf.d/mysite.local.conf
 
 COPY ./index.html /data/mysite.local/index.html
