@@ -13,15 +13,58 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "2. Linux.md",
+                "file": "OTUS 2. Linux.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2. Linux"
+              "title": "OTUS 2. Linux"
+            }
+          },
+          {
+            "id": "023d8ef68694d8a8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Как работает Интернет и протоколы соединения.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Как работает Интернет и протоколы соединения"
+            }
+          },
+          {
+            "id": "a0dd11f9f230f3e3",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Как работает Интернет и протоколы соединения.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Как работает Интернет и протоколы соединения"
+            }
+          },
+          {
+            "id": "48a03217ea422e0d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "OTUS 2. Linux.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "OTUS 2. Linux"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -78,7 +121,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "e771ca0801167cf5",
@@ -154,13 +198,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "2. Linux.md",
+                "file": "OTUS 2. Linux.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура 2. Linux"
+              "title": "Структура OTUS 2. Linux"
             }
           }
         ],
@@ -168,7 +212,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -181,13 +225,26 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "5e57e22a64dd473c",
+  "active": "48a03217ea422e0d",
   "lastOpenFiles": [
-    "Pasted image 20260721150212.png",
-    "Pasted image 20260721143816.png",
-    "2. Linux.md",
-    "Pasted image 20260721143813.png",
-    "1. Окружение. Docker и docker-compose..md",
+    "Pasted image 20260724151518.png",
+    "Pasted image 20260724150829.png",
+    "Pasted image 20260724142423.png",
+    "Pasted image 20260724142349.png",
+    "Pasted image 20260724142339.png",
+    "Pasted image 20260724134411.png",
+    "Pasted image 20260724133441.png",
+    "Pasted image 20260724130325.png",
+    "Pasted image 20260724123906.png",
+    "Pasted image 20260724123536.png",
+    "OTUS 1. Окружение. Docker и docker-compose..md",
+    "Как работает Интернет и протоколы соединения.md",
+    "OTUS 2. Linux.md",
+    "Pasted image 20260724123023.png",
+    "REACT хуки.md",
+    "Как работает VPN.md",
+    "Без названия 1",
+    "Без названия",
     "Без названия.canvas"
   ]
 }
