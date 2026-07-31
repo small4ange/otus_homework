@@ -132,7 +132,7 @@ Composer - пакетный менеджер, который работает т
 - после этого скачивает нужные пакеты
 - и автоматически генерирует код для автозагрузки (как библиотек так и классов текущего проекта)
 #### 1.  Инициализация приложения
-```
+```sh
 composer init
 ```
 - в названии (name) рекомендуется использовать префикс пространства имен (otus/test-app)
@@ -149,7 +149,7 @@ composer init
 - после установки composer добавит классы пакета в автозагрузку и обновит composer.json, composer.lock
 
 Например Slugify
-```
+```sh
 composer require cocur/slugify
 ```
 Теперь в composer.json внутри require находятся библиотеки установленные. В ней записано, что версия у нас не меньше 4.6
@@ -161,12 +161,12 @@ composer require cocur/slugify
 ![[Pasted image 20260730163936.png]]
 Здесь мы видим что composer использует spl_autoload_register()
 Очистка autoload:
-```
+```sh
 composer dump-autoload 
 ```
 
 ## Добавление пакетов, нужных только во время разработки
-```
+```sh
 composer require --dev phpunit/phpunit
 ```
 - эти пакеты будут установлены только локально
@@ -224,7 +224,7 @@ composer require добавляет в composer.json в массив require н�
 
 Разработаем пакет, который будет считать кол-во символов в строке
 Создаем приложение
-```
+```sh
 composer init
 ```
 Записываем Package name 
@@ -266,7 +266,7 @@ echo $processor->getLength('my string')' // 9
 ```
 
 Создаем на github публичный репозиторий, закидываем туда наш проект:
-```git
+```sh
 git init
 
 git config user.email "dk@example.com" && git config user.name "DmitryKirillov"
@@ -292,12 +292,16 @@ class StringProcessor
 }
 ```
 И отправляем проект в гитхаб
-```
+```sh
 git add .
 
 git commit -m "Add StringProcessor"
 
 git push origin HEAD
+```
+Затем каждое наше приложение должно быть с указанием версии, поэтому версию мы указываем как тег коммита в гите:
+```sh
+git tag -a 1.0.0 -m "Init version"
 ```
 
 
