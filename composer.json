@@ -1,0 +1,22 @@
+{
+    "name": "user1872/composer_use",
+    "description": "\u001b[A\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[small4ange/composer_usage",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "User1872\\ComposerUse\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "volkova",
+            "email": "katrinavolk37695@gmail.com"
+        }
+    ],
+    "require": {
+        "small4ange/katka-v-composer": "^1.0"
+    }
+}
+
+
+
