@@ -161,7 +161,7 @@
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура OTUS 4. Composer"
+              "title": "Структура"
             }
           }
         ],
@@ -184,17 +184,17 @@
   },
   "active": "1d13d46f81ba92ba",
   "lastOpenFiles": [
+    "Pasted image 20260803115958.png",
+    "Pasted image 20260803114928.png",
+    "Pasted image 20260803114635.png",
+    "Pasted image 20260803114249.png",
+    "Pasted image 20260803114142.png",
+    "Pasted image 20260803111754.png",
+    "Pasted image 20260803111724.png",
+    "Pasted image 20260803111711.png",
     "Pasted image 20260731164148.png",
     "Pasted image 20260731160650.png",
     "Pasted image 20260731155929.png",
-    "Pasted image 20260731155849.png",
-    "Pasted image 20260731155558.png",
-    "Pasted image 20260731154518.png",
-    "Pasted image 20260731154413.png",
-    "Pasted image 20260731154201.png",
-    "Pasted image 20260730163936.png",
-    "Pasted image 20260730163830.png",
-    "Pasted image 20260730163736.png",
     "OTUS 1. Окружение. Docker и docker-compose..md",
     "OTUS 2. Linux.md",
     "OTUS 3. Внутреннее устройство PHP.md",
