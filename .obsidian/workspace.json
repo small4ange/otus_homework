@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "07e53662425281ea",
+        "id": "65c871721ef80927",
         "type": "tabs",
         "children": [
           {
-            "id": "1d13d46f81ba92ba",
+            "id": "e890dcf7241a9c7c",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OTUS 4. Composer.md",
+                "file": "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OTUS 4. Composer"
+              "title": "OTUS 5. PHP Веб сервера  (Apache x Nginx)"
             }
           }
         ]
@@ -41,7 +41,9 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-folder-closed",
               "title": "Файловый менеджер"
@@ -155,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OTUS 4. Composer.md",
+                "file": "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -182,30 +184,32 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "1d13d46f81ba92ba",
+  "active": "e890dcf7241a9c7c",
   "lastOpenFiles": [
-    "Pasted image 20260803115958.png",
-    "Pasted image 20260803114928.png",
-    "Pasted image 20260803114635.png",
-    "Pasted image 20260803114249.png",
-    "Pasted image 20260803114142.png",
-    "Pasted image 20260803111754.png",
-    "Pasted image 20260803111724.png",
-    "Pasted image 20260803111711.png",
-    "Pasted image 20260731164148.png",
-    "Pasted image 20260731160650.png",
-    "Pasted image 20260731155929.png",
-    "OTUS 1. Окружение. Docker и docker-compose..md",
-    "OTUS 2. Linux.md",
-    "OTUS 3. Внутреннее устройство PHP.md",
-    "OTUS 4. Composer.md",
-    "Кейсы пользования Codex CLI.md",
-    "SQL Documentation.md",
+    "Pasted image 20260806165839.png",
+    "Pasted image 20260806145303.png",
+    "Pasted image 20260806145041.png",
+    "Pasted image 20260806144555.png",
     "Как работает Интернет и протоколы соединения.md",
+    "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
+    "Node.js.md",
+    "Pasted image 20260806143524.png",
+    "Pasted image 20260806142904.png",
+    "Pasted image 20260806142833.png",
+    "Pasted image 20260806142707.png",
+    "Pasted image 20260806142612.png",
+    "Pasted image 20260806141801.png",
+    "Pasted image 20260806141637.png",
+    "OTUS. Лекции/OTUS 4. Composer.md",
+    "OTUS. Лекции/OTUS 3. Внутреннее устройство PHP.md",
+    "OTUS. Лекции/OTUS 2. Linux.md",
+    "OTUS. Лекции/OTUS 1. Окружение. Docker и docker-compose..md",
+    "SQL Documentation.md",
+    "Без названия.canvas",
     "REACT хуки.md",
+    "Кейсы пользования Codex CLI.md",
+    "OTUS. Лекции",
     "Как работает VPN.md",
-    "Без названия 1",
-    "Без названия",
-    "Без названия.canvas"
+    "Без названия 1"
   ]
 }
