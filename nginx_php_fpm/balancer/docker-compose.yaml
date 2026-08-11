@@ -1,0 +1,181 @@
+version: '3'
+
+services:
+  # Балансировщик Nginx
+  nginx-balancer:
+    build:
+      context: ./nginx-balancer
+      dockerfile: Dockerfile
+    image: balance/nginx-balancer
+    container_name: nginx-balancer
+    ports:
+      - "80:80"
+    depends_on:
+      - nginx-app1
+      - nginx-app2
+      - nginx-app3
+    networks:
+      - app-network
+
+  # Бэкенд Nginx 1
+  nginx-app1:
+    build:
+      context: ./nginx-app
+      dockerfile: Dockerfile
+    image: balance/nginx-app
+    container_name: nginx-app1
+    environment:
+      - PHP_HOST=app1
+    volumes:
+      - ./code:/data/mysite.local
+    depends_on:
+      - app1
+    networks:
+      - app-network
+
+  # Бэкенд Nginx 2
+  nginx-app2:
+    build:
+      context: ./nginx-app
+      dockerfile: Dockerfile
+    image: balance/nginx-app
+    container_name: nginx-app2
+    environment:
+      - PHP_HOST=app2
+    volumes:
+      - ./code:/data/mysite.local
+    depends_on:
+      - app2
+    networks:
+      - app-network
+
+  # Бэкенд Nginx 3
+  nginx-app3:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: balance/nginx
+    container_name: nginx-app3
+    environment:
+      - PHP_HOST=app3
+    volumes:
+      - ./code:/data/mysite.local
+    depends_on:
+      - app3
+    networks:
+      - app-network
+
+  # PHP-FPM 1
+  app1:
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php
+    container_name: app1
+    volumes:
+      - ./code:/data/mysite.local
+      - ./fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - redis-app1
+      - redis-app2
+      - redis-app3
+    networks:
+      - app-network
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  # PHP-FPM 2
+  app2:
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php
+    container_name: app2
+    volumes:
+      - ./code:/data/mysite.local
+      - ./fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - redis-app1
+      - redis-app2
+      - redis-app3
+    networks:
+      - app-network
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6380
+
+  # PHP-FPM 3
+  app3:
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php
+    container_name: app3
+    volumes:
+      - ./code:/data/mysite.local
+      - ./fpm/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      - redis-app1
+      - redis-app2
+      - redis-app3
+    networks:
+      - app-network
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6381
+
+  # Redis
+   
+  redis-app1:
+    image: redis:alpine
+    container_name: redis-app1
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    volumes:
+      - redis-app1-data:/data
+    networks:
+      - app-network
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+    
+  redis-app2:
+    image: redis:alpine
+    container_name: redis-app2
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-app2-data:/data
+    networks:
+      - app-network
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+  
+  redis-app3:
+    image: redis:alpine
+    container_name: redis-app3
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-app3-data:/data
+    networks:
+      - app-network
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+
+  redis-cluster-creator:
+    image: redis:alpine
+    container_name: redis-cluster-creator
+    depends_on:
+      - redis-app1
+      - redis-app2
+      - redis-app3
+    networks:
+      - app-network
+    
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-app1-data:
+  redis-app2-data:
+  redis-app3-data:
