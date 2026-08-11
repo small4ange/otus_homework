@@ -4,7 +4,7 @@ FROM nginx:alpine
 RUN apk add --no-cache gettext
 
 # Копируем шаблон конфига
-COPY mysite.local.conf.template /etc/nginx/templates/default.conf.template
+COPY mysite.local.conf /etc/nginx/templates/default.conf.template
 
 # Шаблон будет обработан при старте nginx
 EXPOSE 80
