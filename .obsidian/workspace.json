@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "65c871721ef80927",
+        "id": "25d6a052722dde06",
         "type": "tabs",
         "children": [
           {
-            "id": "e890dcf7241a9c7c",
+            "id": "ca2e8cd9b2fdee03",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
+                "file": "OTUS. Лекции/OTUS 7. Основные понятия баз данных.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OTUS 5. PHP Веб сервера  (Apache x Nginx)"
+              "title": "OTUS 7. Основные понятия баз данных"
             }
           }
         ]
@@ -80,8 +80,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "e771ca0801167cf5",
@@ -157,7 +156,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
+                "file": "OTUS. Лекции/OTUS 7. Основные понятия баз данных.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -184,24 +183,25 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "e890dcf7241a9c7c",
+  "active": "ca2e8cd9b2fdee03",
   "lastOpenFiles": [
-    "Pasted image 20260806165839.png",
-    "Pasted image 20260806145303.png",
-    "Pasted image 20260806145041.png",
-    "Pasted image 20260806144555.png",
-    "Как работает Интернет и протоколы соединения.md",
+    "OTUS. Лекции/OTUS 7. Основные понятия баз данных.md",
     "OTUS. Лекции/OTUS 5. PHP Веб сервера  (Apache x Nginx).md",
-    "Node.js.md",
-    "Pasted image 20260806143524.png",
-    "Pasted image 20260806142904.png",
-    "Pasted image 20260806142833.png",
-    "Pasted image 20260806142707.png",
-    "Pasted image 20260806142612.png",
-    "Pasted image 20260806141801.png",
-    "Pasted image 20260806141637.png",
+    "OTUS. Лекции/OTUS 6. Как работает интернет - Сети. Маршрутизация. Протоколы.md",
+    "Pasted image 20260821115445.png",
+    "Pasted image 20260821115414.png",
+    "Pasted image 20260821115256.png",
+    "Pasted image 20260821115152.png",
+    "Pasted image 20260821115125.png",
+    "Pasted image 20260821115025.png",
+    "Pasted image 20260821113646.png",
+    "Pasted image 20260821113510.png",
+    "Pasted image 20260821112756.png",
+    "Pasted image 20260820153820.png",
     "OTUS. Лекции/OTUS 4. Composer.md",
     "OTUS. Лекции/OTUS 3. Внутреннее устройство PHP.md",
+    "Как работает Интернет и протоколы соединения.md",
+    "Node.js.md",
     "OTUS. Лекции/OTUS 2. Linux.md",
     "OTUS. Лекции/OTUS 1. Окружение. Docker и docker-compose..md",
     "SQL Documentation.md",

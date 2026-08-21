@@ -139,3 +139,614 @@ Location сравнивает что к нам пришло (какой идет
 -  1 location = для всех запросов с префиксом .jpg, .gif, .css и тд все, что описаны в скобках location мы не записываем это обращение (access_log off), и отдаем этот файл напрямую. expires max - настройка кэша, nginx будет хранить все в кэше и не будет больше ходить на сервер и читать файловую систему, чтобы ответить на запрос верно
 - 2 location / = локация ко всем запросам, отправляем их на index.php и отправляем ему query_string 
 - 3 location = если у нас приходят все файлики .php, сначала пытаемся его получить - при неполучении отправляем 404 (try_files), разбиваем файлик для fastcgi - парсим путь, передаем его в fastcgi_pass - app:9000 - развернутый php-fpm в docker-е, который работает на порте 9000, fastcgi_index- какой файл индекса в php-fpm, fastcgi_param - передаем все параметры, include - включаем fastcgi_params
+
+Задают вопрос на собесах как из вебсервера код поступает в интерпретатор php?
+- в настройках каждого сервера (каждого домена в контексте сервера) мы описываем что делать с запросами в контексте локации - можем подключить например fastcgi как в нашем примере, а можем передавать сообщения apache, как было описано в схеме выше [[OTUS 5. PHP Веб сервера  (Apache x Nginx)#Apache + Nginx + PHP]] 
+### Чеклист настроки сайта
+
+![[Pasted image 20260807090553.png]]
+### Команды проверки конфигурации Nginx
+```sh
+sudo nginx -t = проверка конфигурации
+sudo nginx -s reload = обновление конфигурации
+```
+При обновлении nginx не отключается, а в моменте перечитает конфиги и обновит их
+### Логи Nginx
+Мы записывали уже в конфигурации nginx 
+[[OTUS 5. PHP Веб сервера  (Apache x Nginx)#Конфигурация Nginx]]
+куда будут сохраняться наши логи, они делятся на два типа:
+```sh
+Access logs (/var/log/nginx/access.log) - логи доступа
+Errors logs (/var/log/nginx/error.log) - логи ошибок nginx
+```
+# PHP-FPM ServerAPI (SAPI)
+Необходим для взаимодействия PHP и Nginx
+![[Pasted image 20260807091511.png]]
+![[Pasted image 20260807091538.png]]
+## Конфигурация
+![[Pasted image 20260807091736.png]]
+- pm - процессы, мы можем выделять для php-fpm либо динамическую загрузку процесса, либо статическую, либо по требованию
+- в случае динамической загрузки мы можем указать максимальное кол-во процессов - оперируем количеством ядер и умножаем их на два
+- когда php-fpm запускается мы тратим время на запуск процессов, поэтому мы устанавливаем start_servers - количество процессов запущенных при запуске php-fpm
+- также можем указать максимальное и минимальное кол-во неактивных процессов сервера - нужны в случае если нагрузки нет, но она может появиться - поэтому какое-то кол-во процессов должно быть активно для быстрого принятия запросов (быть готовыми к нагрузке)
+Как считаем: допустим есть сервер с 4 ядрами и 8 ГБ оперативки - start_servers = 8 - 4 ядра умножаем на два. max_spare_servers = 12, min_spare_servers = 6 (эти цифры подбираются на глаз, после тестируются на железе и корректируются)
+
+## FastCGI
+- протокол соединения PHP и Nginx
+- ранее был CGI однопоточный можно сказатьь, а афыеСПШ сделали асинхронным - в этом вся разница между ними
+# Практика. 
+
+## Настройка nginx в Docker:
+[[OTUS 1. Окружение. Docker и docker-compose.]]
+```
+FROM nginx
+
+COPY ./mysite.local.conf /etc/nginx/conf.d/mysite.local.conf
+
+COPY ./index.html /data/mysite.local/index.html
+
+WORKDIR /data
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+# docker build -t sf/nginx .
+# docker run -d -p 80:80 sf/nginx
+```
+- подключаем образ nginx
+- копируем в контейнер конфиг nginx
+- закидываем в докер index.html
+- указываем рабочую директорию
+- открываем порт 80
+- запускаем nginx в режиме выключенного демона, чтобы он всегда работал, тк если демон будет открытым - nginx упадет - докер-контейнер живет до тех пор, пока существует рабочий процесс внутри него, а nginx должен работать 24/7 вместе со своим контейнером, пока мы его не отключим
+
+index.httml - обычный html
+![[Pasted image 20260807101941.png]]
+
+mysite.local - конфиг сайта
+```
+server {
+    # указываем 80 порт для соединения
+    listen 80;
+    #нужно указать, какому доменному имени принадлежит наш конфиг
+    server_name mysite.local;
+
+    # задаём корневую директорию
+    root /data/mysite.local;
+
+    # стартовый файл
+    index index.html;
+}
+```
+запускаем сборку:
+```
+cd domain
+docker build -t sf/nginx .
+docker run -d -p 80:80 sf/nginx
+```
+и теперь если мы зайдем на http://mysite.local - получим нашу страницу index.html
+а если мы зайдем на http://localhost - увидим Welcome to Nginx
+
+## FCGI
+code/index.php
+```code/index.php
+<?php
+
+echo "Привет, Otus!<br>".date("Y-m-d H:i:s") ."<br><br>";
+
+echo "Что-то новейшее ";
+
+phpinfo();
+```
+
+### Настройки PHP-FPM
+```Dockerfile
+FROM php:7.4-fpm
+
+# ставим необходимые для нормальной работы модули (доп утилиты)
+RUN apt-get update && apt-get install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+	libpng-dev \
+	libonig-dev \
+	libzip-dev \
+	libmemcached-dev \
+	libmcrypt-dev \
+        && pecl install mcrypt-1.0.3 \
+	&& docker-php-ext-enable mcrypt \
+        && docker-php-ext-install -j$(nproc) iconv mbstring mysqli pdo_mysql zip \
+	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+        && docker-php-ext-install -j$(nproc) gd \
+     && pecl install memcached && \
+        docker-php-ext-enable memcached
+
+ # копируем конфиг для php
+COPY ./php.ini /usr/local/etc/php/conf.d/php-custom.ini
+# рабочая папка
+WORKDIR /data
+
+# запускаем php-fpm
+CMD ["php-fpm"]
+```
+
+php.ini
+```ini
+session.save_handler = memcache
+session.save_path = "tcp://memcache:11211"
+```
+
+mysite.local.conf для php-fpm
+```
+server {
+    # указываем 80 порт для соединения
+    listen 80;
+    # нужно указать, какому доменному имени принадлежит наш конфиг
+    server_name mysite.local;
+
+    # задаём корневую директорию
+    root /data/mysite.local;
+
+    # стартовый файл
+    index index.php index.html;
+
+    # при обращении к статическим файлам логи не нужны, равно как и обращение к fpm
+    # http://mysite.local/static/some.png
+    location ~* .(jpg|jpeg|gif|css|png|js|ico|html)$ {
+        access_log off;
+        expires max;
+    }
+
+    # помним про единую точку доступа
+    # все запросы заворачиваются в корневую директорию root на index.php
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # и наконец правило обращения к php-fpm
+    location ~* .php$ {
+        try_files $uri = 404;
+        fastcgi_split_path_info ^(.+.php)(/.+)$;
+        fastcgi_pass app:9000;
+        #fastcgi_pass unix:/var/run/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+```
+docker-compose.yaml
+```
+# версия синтаксиса
+version: '3'
+
+# в этом блоке мы описываем контейнеры, которые будут запускаться
+services:
+  #контейнер с Nginx
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: myapp/nginx
+    container_name: webserver
+    # проброс портов
+    ports:
+      - "80:80"
+    volumes:
+       - ./code:/data/mysite.local
+    networks:
+      - app-network
+
+  #Контейнер с PHP-FPM, назовём его app
+  app:
+    # Если нет секции build, то система будет искать образ в репозиториях
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: myapp/php # имя будущего образа
+    container_name: app1 # имя контейнера после запуска
+    volumes:
+       - ./code:/data/mysite.local
+    # мы можем создать для контейнеров внутреннюю сеть
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+```
+- если мы посмотрим на app в docker-compose -  он как раз в конфиге  nginx прописан как app:9000 - имя контейнера:порт
+**Как Nginx знает адрес `app1`?**
+- Docker создает внутреннюю сеть `app-network`.
+- Все контейнеры в этой сети видят друг друга по именам.
+- Nginx и PHP находятся в одной сети, поэтому Nginx обращается к `app1` как к имени хоста.
+
+- PHP-контейнер (собранный из `fpm/Dockerfile`) запускает процесс `php-fpm`, который слушает порт 9000.
+
+### 1. ЧТО ПРИХОДИТ ОТ КЛИЕНТА В NGINX?
+Когда ты открываешь браузер и вводишь `http://localhost`, клиент отправляет HTTP-запрос:
+```http
+GET /index.php HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0...
+Accept: text/html
+```
+
+### 2. КАК ЗАПРОС ПОПАДАЕТ В КОНТЕЙНЕР?
+
+В `docker-compose.yaml` есть строчка:
+
+```yaml
+ports:
+  - "80:80"
+```
+
+Порт **80** на твоем компьютере (хост-машине) → пробрасывается в порт **80** внутри контейнера Nginx.
+Когда браузер стучится на `localhost:80`, Docker перенаправляет трафик прямо в контейнер.
+### 3. ЧТО ДЕЛАЕТ NGINX С ЗАПРОСОМ?
+Nginx внутри контейнера читает свой конфиг (который лежит в `/etc/nginx/conf.d/mysite.local.conf`).
+
+**Шаг 1:** Nginx смотрит на URI запроса.
+**Шаг 2:** Если запрос заканчивается на `.php` → Nginx НЕ обрабатывает его сам, а отправляет в PHP-FPM.
+**Шаг 3:** Если запрос заканчивается на `.html`, `.css`, `.js` → Nginx ищет файл в папке `/data/mysite.local` и отдает его напрямую (быстро, без PHP).
+### 4. КАК NGINX ОТПРАВЛЯЕТ ЗАПРОС В PHP-FPM?
+
+```nginx
+location ~ \.php$ {
+    fastcgi_pass app1:9000;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+}
+```
+1. Nginx видит, что запрос к `.php` файлу.
+2. Он формирует **FastCGI-запрос** (это протокол для общения с PHP).
+3. Отправляет этот запрос по адресу `app1:9000`.
+4. `app1` — это имя контейнера с PHP в `docker-compose.yaml`.
+5. `9000` — порт, на котором PHP-FPM слушает запросы внутри своего контейнера.
+
+**Как Nginx знает адрес `app1`?**
+- Docker создает внутреннюю сеть `app-network`.
+- Все контейнеры в этой сети видят друг друга по именам.
+- Nginx и PHP находятся в одной сети, поэтому Nginx обращается к `app1` как к имени хоста.
+### 5. ЧТО ДЕЛАЕТ PHP-FPM?
+PHP-контейнер (собранный из `fpm/Dockerfile`) запускает процесс `php-fpm`, который слушает порт 9000.
+**Когда приходит запрос:**
+1. PHP-FPM получает FastCGI-запрос от Nginx.
+2. Читает файл, который указан в `SCRIPT_FILENAME` (например, `/data/mysite.local/index.php`).
+3. Выполняет PHP-код.
+4. Формирует ответ (HTML, JSON, и т.д.).
+5. Отправляет ответ обратно Nginx через FastCGI.
+
+### 6. ЧТО ДЕЛАЕТ PHP-СКРИПТ?
+Пример `index.php`:
+```php
+<?php
+echo "Hello, World!";
+?>
+```
+PHP-скрипт может:
+- Подключиться к базе данных
+- Сделать вычисления
+- Прочитать файлы
+- Сгенерировать HTML
+### 7. КАК ОТВЕТ ВОЗВРАЩАЕТСЯ КЛИЕНТУ?
+
+PHP-контейнер → (FastCGI-ответ) → Nginx → (HTTP-ответ) → Клиент
+1. PHP отдает результат Nginx.
+2. Nginx заворачивает его в HTTP-ответ.
+3. Отправляет клиенту через проброшенный порт 80.
+
+
+Теперь когда мы запустим проект, получим что при открытии http://mysite.local будет открываться страница 
+![[Pasted image 20260807115134.png]]
+с выполненным кодом php.getInfo();
+
+# Балансировка
+Проблема заключается в том, что один из серверов может отвалиться
+![[Pasted image 20260807115206.png]]
+Поэтому существует балансировка:
+![[Pasted image 20260807115243.png]]
+По сути это Горизонтальное масштабирование количества запросов + мы не боимся того, что что-то у нас отключиться - тогда Nginx просто не будет туда отправлять запросы, количество в обработке запросов уменьшится
+
+Когда у нас базы распределены (как на рисунке) это называется шардирование, необходимо для того, чтобы базы данных можно было распределить по миру и из одной точки мира клиент будет подключаться к ближайшей
+
+Есть еще другой вид балансировки без шардирования
+![[Pasted image 20260807115628.png]]
+
+Является классической схемой. СУБД здесь может реплицироваться. 
+
+**Балансировка нужна для:**
+- отказоустойчивости
+- горизонтального масштабирования
+
+Есть несколько видов схем:
+
+![[Pasted image 20260807115759.png]]
+- Та что выше - Round Robin - где все соединения идут по кругу
+- Least Connection определяет минимально загруженный сервер и отдает ему запросы
+- IP Hash - хэширование по IP - нам нужно написать хэш-функцию для IP приходящих, допустим хэш-функция статок деления на 9, мы каждый IP складываем, делим на 9 и определяем куда отправлять запрос на 1 из 9 соединений. Нагрузка будет не по кругу, а тк сумма всегда будет разная нагрузка будет рандомной в какой-то степени. Ее используют обычно для шардирования - чтобы nginx рандомно подключался к php-fpm и далее php-fpm по такому же принципу находила субд, куда обратиться - тк может быть такое что некоторые субд для этого php-fpm недоступны
+
+Nginx может быть также балансировщиком для других nginx
+![[Pasted image 20260807120720.png]]
+
+## Практика балансировки
+
+index.php
+```php
+<?php  
+  
+echo "Привет, Otus!<br>".date("Y-m-d H:i:s")."<br><br>";  
+  
+echo "Запрос обработал контейнер: " . $_SERVER['HOSTNAME'];
+```
+Здесь мы выводим для понимания каким хостом был обработан запрос
+
+В php-fpm все то же самое
+
+Настройка nginx  - DockerFile тот же
+mysite.local.conf
+```conf
+upstream php-fpm-backend {
+    least_conn;
+    server app1:9000;
+    server app2:9000;
+    server app3:9000;
+}
+
+server {
+    # указываем 80 порт для соединения
+    listen 80;
+    # нужно указать, какому доменному имени принадлежит наш конфиг
+    server_name mysite.local;
+
+    # задаём корневую директорию
+    root /data/mysite.local;
+
+    # стартовый файл
+    index index.php index.html;
+
+    # при обращении к статическим файлам логи не нужны, равно как и обращение к fpm
+    location ~* .(jpg|jpeg|gif|css|png|js|ico|html)$ {
+        access_log off;
+        expires max;
+    }
+
+    # помним про единую точку доступа
+    # все запросы заворачиваются в корневую директорию root на index.php
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # и наконец правило обращения к php-fpm
+    location ~* .php$ {
+        try_files $uri = 404;
+        fastcgi_split_path_info ^(.+.php)(/.+)$;
+        fastcgi_pass php-fpm-backend;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+
+```
+
+Здесь появляется понятие upstream - где идет соединение нескольких серверов в одну группу
+и теперь мы ставим
+fastcgi_pass php-fpm-backend;
+то есть не в один контейнер докера app:9000 а указываем сам upstream
+Всего у нас есть три сервера, они добавлены в docker-compose.yaml
+```yaml
+# версия синтаксиса
+version: '3'
+
+# в этом блоке мы описываем контейнеры, которые будут запускаться
+services:
+  #контейнер с Nginx
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: balance/nginx
+    container_name: nginx
+    # проброс портов
+    ports:
+      - "80:80"
+    volumes:
+       - ./code:/data/mysite.local
+    networks:
+      - app-network
+
+  #Контейнер с PHP-FPM, назовём его app
+  app1:
+    # Если нет секции build, то система будет искать образ в репозиториях
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php # имя будущего образа
+    container_name: app1 # имя контейнера после запуска
+    volumes:
+       - ./code:/data/mysite.local
+    # мы можем создать для контейнеров внутреннюю сеть
+    networks:
+      - app-network
+
+  #Контейнер с PHP-FPM, назовём его app
+  app2:
+    # Если нет секции build, то система будет искать образ в репозиториях
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php # имя будущего образа
+    container_name: app2 # имя контейнера после запуска
+    volumes:
+      - ./code:/data/mysite.local
+    # мы можем создать для контейнеров внутреннюю сеть
+    networks:
+      - app-network
+
+  #Контейнер с PHP-FPM, назовём его app
+  app3:
+    # Если нет секции build, то система будет искать образ в репозиториях
+    build:
+      context: ./fpm
+      dockerfile: Dockerfile
+    image: balance/php # имя будущего образа
+    container_name: app3 # имя контейнера после запуска
+    volumes:
+      - ./code:/data/mysite.local
+    # мы можем создать для контейнеров внутреннюю сеть
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+```
+По сути те же контейнеры app, только мы их смасштабировали и размножили, а также подключили к одной сети app-network
+
+При запуске страницы в качестве host мы будем видеть айдишники контейнеров из docker-а
+
+## Сессии
+**Сессия** — это механизм сохранения данных пользователя между разными HTTP-запросами.
+
+1. Пользователь заходит на сайт
+   ↓
+2. Сервер создает сессию (например, session_id = "abc123")
+   ↓
+3. Сервер сохраняет данные сессии (корзина, логин, и т.д.)
+   ↓
+4. Сервер отправляет клиенту COOKIE с session_id
+   ↓
+5. Клиент хранит COOKIE и отправляет его с каждым запросом
+   ↓
+6. При следующем запросе сервер читает session_id из COOKIE
+   ↓
+7. Сервер находит данные сессии по этому ID
+
+![[Pasted image 20260807122229.png]]
+По умолчанию PHP хранит сессии в **файлах** на локальном диске контейнера. У каждого контейнера свой диск, поэтому сессии не синхронизируются.
+```
+Пользователь → Nginx → app1 (создал сессию, сохранил в файл)
+                         ↓
+Следующий запрос → Nginx → app2 (не находит сессию, создает новую!)
+                         ↓
+Пользователь → "Куда делась моя корзина?!" 😱
+```
+- Сессии хранятся на файловой системе сервера, их необходимо выносить в memcached, Redis, MongoDB
+- Ничего на файловой системе хостинга не стоит хранить - не сможем сделать
+
+###  **ХРАНЕНИЕ В ФАЙЛАХ С ОБЩИМ ТОМОМ** (плохо)
+
+Можно смонтировать общую папку для всех PHP-контейнеров:
+```yaml
+services:
+  app1:
+    volumes:
+      - ./sessions:/var/lib/php/sessions  # общая папка
+  app2:
+    volumes:
+      - ./sessions:/var/lib/php/sessions
+  app3:
+    volumes:
+      - ./sessions:/var/lib/php/sessions
+```
+**Проблемы:**
+- Медленно (файловые операции)
+- Проблемы с блокировками
+- Не масштабируется
+
+###  **ХРАНЕНИЕ В REDIS** (рекомендуемый способ)
+
+**Redis** — это быстрая in-memory база данных, идеально подходит для сессий.
+**Как настроить:**
+**Шаг 1:** Добавить Redis в `docker-compose.yaml`:
+```yaml
+services:
+  # ... nginx, app1, app2, app3 ...
+  
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+```
+**Шаг 2:** Установить расширение Redis в PHP:
+В `fpm/Dockerfile` добавить:
+```dockerfile
+RUN pecl install redis && docker-php-ext-enable redis
+```
+
+**Шаг 3:** Настроить PHP на хранение сессий в Redis:
+
+В `php.ini` добавить:
+```ini
+session.save_handler = redis
+session.save_path = "tcp://redis:6379"
+```
+**Или прямо в коде PHP:**
+```php
+<?php
+ini_set('session.save_handler', 'redis');
+ini_set('session.save_path', 'tcp://redis:6379');
+session_start();
+$_SESSION['user_id'] = 123;
+$_SESSION['cart'] = ['item1', 'item2'];
+?>
+```
+**Как это работает:**
+```
+Пользователь → Nginx → app1 (сохраняет сессию в Redis)
+                        ↓
+Следующий запрос → Nginx → app2 (читает сессию из Redis) ✅
+                        ↓
+Все контейнеры видят одни и те же данные!
+```
+### **ХРАНЕНИЕ В MEMCACHED** (тоже хороший вариант)
+
+**Memcached** — еще одна in-memory база, похожая на Redis.
+**Настройка:**
+**Шаг 1:** Добавить Memcached в `docker-compose.yaml`:
+```yaml
+services:
+  memcache:
+    image: memcached:alpine
+    container_name: memcache
+    ports:
+      - "11211:11211"
+    networks:
+      - app-network
+    restart: unless-stopped
+```
+
+**Шаг 2:** Установить расширение:
+В `fpm/Dockerfile`:
+```dockerfile
+RUN apt-get install -y libmemcached-dev \
+    && pecl install memcached \
+    && docker-php-ext-enable memcached
+```
+**Шаг 3:** Настроить PHP:
+В `php.ini`:
+```ini
+session.save_handler = memcache
+session.save_path = "tcp://memcache:11211"
+```
+
+### **ХРАНЕНИЕ В БАЗЕ ДАННЫХ (MySQL/PostgreSQL)** (медленно, но надежно)
+
+**Минусы:**
+- Медленнее Redis/Memcached
+- Нагрузка на БД
+
+**Плюсы:**
+- Данные не теряются при перезапуске
+- Можно делать сложные запросы
+### Примеры схем хранения сессий:
+ ![[Pasted image 20260807122405.png]]
+ ![[Pasted image 20260807122431.png]]
+![[Pasted image 20260807122421.png]]
