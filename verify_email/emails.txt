@@ -1,0 +1,15 @@
+test@gmail.com
+user@yandex.ru
+admin@mail.ru
+support@yahoo.com
+info@outlook.com
+contact@protonmail.com
+sales@icloud.com
+feedback@rambler.ru
+hello@aol.com
+team@zoho.com
+postmaster@yandex.ru
+no-reply@mail.ru
+support@bk.ru
+info@list.ru
+admin@inbox.ru
